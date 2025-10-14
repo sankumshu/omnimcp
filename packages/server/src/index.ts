@@ -1,0 +1,95 @@
+/**
+ * OmniMCP Platform Server
+ * Main entry point
+ */
+
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import { config } from 'dotenv';
+import pino from 'pino';
+import pinoHttp from 'pino-http';
+
+import { MCPRegistry } from './registry/mcp-registry.js';
+import { authRouter } from './routes/auth.js';
+import { mcpRouter } from './routes/mcp.js';
+import { marketplaceRouter } from './routes/marketplace.js';
+import { errorHandler } from './middleware/error-handler.js';
+
+// Load environment variables
+config();
+
+// Initialize logger
+const logger = pino({
+  level: process.env.LOG_LEVEL || 'info',
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+    },
+  },
+});
+
+// Initialize Express app
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Initialize MCP Registry (singleton)
+export const mcpRegistry = new MCPRegistry();
+
+// Middleware
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+app.use(pinoHttp({ logger }));
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// API Routes
+app.use('/api/auth', authRouter);
+app.use('/api/mcp', mcpRouter);
+app.use('/api/marketplace', marketplaceRouter);
+
+// MCP Protocol endpoint (for LLMs to connect)
+app.post('/mcp/call', async (req, res) => {
+  try {
+    const { serverId, toolName, arguments: args } = req.body;
+
+    const result = await mcpRegistry.callTool({
+      serverId,
+      toolName,
+      arguments: args,
+    });
+
+    res.json(result);
+  } catch (error: any) {
+    logger.error({ error }, 'MCP call failed');
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+// Error handling
+app.use(errorHandler);
+
+// Start server
+app.listen(port, () => {
+  logger.info(`OmniMCP Platform server listening on port ${port}`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT received, shutting down gracefully');
+  process.exit(0);
+});
