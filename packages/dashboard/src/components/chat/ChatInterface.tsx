@@ -80,7 +80,9 @@ export function ChatInterface({ onToggleSidebar, sidebarOpen }: ChatInterfacePro
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      while (true) {
+      let streamComplete = false;
+
+      while (!streamComplete) {
         const { done, value } = await reader.read();
         if (done) break;
 
@@ -89,39 +91,45 @@ export function ChatInterface({ onToggleSidebar, sidebarOpen }: ChatInterfacePro
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
-            const data = JSON.parse(line.slice(6));
+            try {
+              const data = JSON.parse(line.slice(6));
 
-            if (data.type === 'text') {
-              assistantMessage.content += data.content;
-              setMessages((prev) => {
-                const updated = [...prev];
-                updated[updated.length - 1] = { ...assistantMessage };
-                return updated;
-              });
-            }
+              if (data.type === 'text') {
+                assistantMessage.content += data.content;
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = { ...assistantMessage };
+                  return updated;
+                });
+              }
 
-            if (data.type === 'tool_call_start') {
-              // Show tool being called
-              assistantMessage.content += `\n\n🔧 Calling ${data.toolName}...\n`;
-              setMessages((prev) => {
-                const updated = [...prev];
-                updated[updated.length - 1] = { ...assistantMessage };
-                return updated;
-              });
-            }
+              if (data.type === 'tool_call_start') {
+                // Show tool being called
+                assistantMessage.content += `\n\n🔧 Calling ${data.toolName}...\n`;
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = { ...assistantMessage };
+                  return updated;
+                });
+              }
 
-            if (data.type === 'tool_call_result') {
-              // Show tool result
-              assistantMessage.content += `✓ ${data.toolName} completed\n`;
-              setMessages((prev) => {
-                const updated = [...prev];
-                updated[updated.length - 1] = { ...assistantMessage };
-                return updated;
-              });
-            }
+              if (data.type === 'tool_call_result') {
+                // Show tool result
+                assistantMessage.content += `✓ ${data.toolName} completed\n`;
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = { ...assistantMessage };
+                  return updated;
+                });
+              }
 
-            if (data.type === 'done') {
-              break;
+              if (data.type === 'done') {
+                streamComplete = true;
+                break;
+              }
+            } catch (e) {
+              // Skip invalid JSON lines
+              console.warn('Failed to parse SSE line:', line);
             }
           }
         }

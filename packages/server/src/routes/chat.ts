@@ -28,8 +28,8 @@ chatRouter.post('/', async (req: Request, res: Response) => {
     // TODO: Get user from JWT token
     const userId = 'user_id_placeholder';
 
-    // Get user's enabled MCPs
-    const enabledMCPs = await getUserEnabledMCPs(userId);
+    // Get all registered MCPs from the registry (temporarily bypass database)
+    const enabledMCPs = await mcpRegistry.getAll();
 
     // Convert MCPs to function calling format
     const tools = await buildToolsFromMCPs(enabledMCPs);
@@ -155,8 +155,8 @@ chatRouter.post('/simple', async (req: Request, res: Response) => {
     // TODO: Get user from JWT token
     const userId = 'user_id_placeholder';
 
-    // Get user's enabled MCPs
-    const enabledMCPs = await getUserEnabledMCPs(userId);
+    // Get all registered MCPs from the registry (temporarily bypass database)
+    const enabledMCPs = await mcpRegistry.getAll();
 
     // Convert MCPs to function calling format
     const tools = await buildToolsFromMCPs(enabledMCPs);

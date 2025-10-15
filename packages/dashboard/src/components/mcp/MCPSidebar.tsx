@@ -24,22 +24,25 @@ export function MCPSidebar({ onClose }: MCPSidebarProps) {
   // TODO: Fetch from API
   const [mcps, setMCPs] = useState<MCP[]>([
     {
-      id: '1',
+      id: 'ubereats',
+      name: 'Uber Eats',
+      description: 'Search restaurants, browse menus, order food',
+      enabled: true,
+      icon: '🍕',
+    },
+    {
+      id: 'uber',
+      name: 'Uber',
+      description: 'Book rides, get price estimates, track rides',
+      enabled: true,
+      icon: '🚗',
+    },
+    {
+      id: 'github',
       name: 'GitHub',
       description: 'Create issues, read repos, manage PRs',
-      enabled: true,
-    },
-    {
-      id: '2',
-      name: 'Weather',
-      description: 'Get weather information',
-      enabled: true,
-    },
-    {
-      id: '3',
-      name: 'Slack',
-      description: 'Send messages, read channels',
-      enabled: true,
+      enabled: false,
+      icon: '💻',
     },
   ]);
 

@@ -1,3 +1,5 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
+  "/uber-redirect/page": "app/uber-redirect/page.js",
   "/chat/page": "app/chat/page.js"
 }

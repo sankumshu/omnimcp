@@ -166,7 +166,7 @@ export class LLMProvider {
       stream: true,
     });
 
-    let currentToolCall: Partial<ToolCall> | null = null;
+    let currentToolCall: Partial<ToolCall> & { argumentsString?: string } | null = null;
 
     for await (const chunk of stream) {
       const delta = chunk.choices[0]?.delta;
@@ -187,25 +187,36 @@ export class LLMProvider {
           currentToolCall = {
             id: toolCall.id,
             name: toolCall.function?.name,
+            argumentsString: '',
             arguments: {},
           };
         }
 
         if (toolCall.function?.arguments) {
-          // Accumulate arguments
-          const args = toolCall.function.arguments;
-          currentToolCall.arguments = {
-            ...currentToolCall.arguments,
-            ...JSON.parse(args),
-          };
+          // Accumulate arguments string (streamed in chunks)
+          currentToolCall.argumentsString = (currentToolCall.argumentsString || '') + toolCall.function.arguments;
         }
       }
 
       // Finish tool call
       if (chunk.choices[0]?.finish_reason === 'tool_calls' && currentToolCall) {
+        // Parse complete arguments string
+        if (currentToolCall.argumentsString) {
+          try {
+            currentToolCall.arguments = JSON.parse(currentToolCall.argumentsString);
+          } catch (e) {
+            console.error('Failed to parse tool arguments:', currentToolCall.argumentsString);
+            currentToolCall.arguments = {};
+          }
+        }
+
         yield {
           type: 'tool_call',
-          toolCall: currentToolCall as ToolCall,
+          toolCall: {
+            id: currentToolCall.id!,
+            name: currentToolCall.name!,
+            arguments: currentToolCall.arguments!,
+          },
         };
         currentToolCall = null;
       }

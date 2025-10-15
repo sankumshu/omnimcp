@@ -1,4 +1,4 @@
-// File: /Users/santhoshshunmugaraja/Documents/OmniMCP/packages/dashboard/src/app/chat/page.tsx
+// File: /Users/ajvercueil/Documents/omnimcp/packages/dashboard/src/app/chat/page.tsx
 import * as entry from '../../../../src/app/chat/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -16,18 +16,33 @@ export async function buildToolsFromMCPs(
   const tools: Tool[] = [];
 
   for (const mcp of enabledMCPs) {
-    // Get all tools for this MCP from database
-    const mcpTools = await getMCPTools(mcp.id);
-
-    for (const tool of mcpTools) {
-      tools.push({
-        id: tool.id,
-        serverId: mcp.id,
-        name: `${mcp.name}__${tool.name}`, // Namespace by MCP name
-        description: `[${mcp.name}] ${tool.description}`,
-        parameters: tool.parameters,
-        createdAt: tool.createdAt,
-      });
+    // Check if MCP has tools defined directly (for locally registered MCPs)
+    const mcpWithTools = mcp as any;
+    if (mcpWithTools.tools && Array.isArray(mcpWithTools.tools)) {
+      // Use tools from MCP definition
+      for (const tool of mcpWithTools.tools) {
+        tools.push({
+          id: tool.id || `${mcp.id}_${tool.name}`,
+          serverId: mcp.id,
+          name: `${mcp.id}__${tool.name}`, // Namespace by MCP ID
+          description: `[${mcp.name}] ${tool.description}`,
+          parameters: tool.parameters,
+          createdAt: tool.createdAt || new Date(),
+        });
+      }
+    } else {
+      // Fall back to database for database-backed MCPs
+      const mcpTools = await getMCPTools(mcp.id);
+      for (const tool of mcpTools) {
+        tools.push({
+          id: tool.id,
+          serverId: mcp.id,
+          name: `${mcp.id}__${tool.name}`, // Namespace by MCP ID
+          description: `[${mcp.name}] ${tool.description}`,
+          parameters: tool.parameters,
+          createdAt: tool.createdAt,
+        });
+      }
     }
   }
 

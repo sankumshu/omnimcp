@@ -156,14 +156,39 @@ export class MCPRegistry implements IMCPRegistry {
     request: ToolCallRequest
   ): Promise<ToolCallResponse> {
     try {
-      // In production, this would invoke the actual MCP server process
-      // For now, we'll return a placeholder
+      // Import process manager dynamically to avoid circular dependency
+      const { mcpProcessManager } = await import('../services/mcp-process-manager.js');
+
+      // Check if MCP process is running, spawn if needed
+      if (!mcpProcessManager.isRunning(server.id)) {
+        // Get config from server metadata (stored during registration)
+        const config = (server as any).config;
+        if (!config) {
+          return {
+            success: false,
+            error: `No process config found for MCP: ${server.id}`,
+          };
+        }
+
+        await mcpProcessManager.spawn({
+          id: server.id,
+          command: config.command,
+          args: config.args,
+          cwd: config.cwd,
+          env: config.env,
+        });
+      }
+
+      // Call the tool via process manager
+      const result = await mcpProcessManager.callTool(
+        server.id,
+        request.toolName,
+        request.arguments
+      );
+
       return {
         success: true,
-        result: {
-          message: `Platform-hosted tool ${request.toolName} called successfully`,
-          arguments: request.arguments,
-        },
+        result,
       };
     } catch (error: any) {
       return {
