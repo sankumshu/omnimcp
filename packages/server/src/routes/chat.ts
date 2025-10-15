@@ -8,6 +8,8 @@ import type { Request, Response } from 'express';
 import { llmProvider, type LLMModel, type Message } from '../services/llm-providers.js';
 import { buildToolsFromMCPs, parseToolCall, formatToolResult } from '../services/mcp-to-functions.js';
 import { mcpRegistry } from '../index.js';
+import { requireAuth } from '../middleware/auth-middleware.js';
+import { getUserEnabledMCPs, getMCPTools } from '../services/mcp-database.js';
 
 export const chatRouter = Router();
 

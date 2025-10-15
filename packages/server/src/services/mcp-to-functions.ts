@@ -4,6 +4,7 @@
  */
 
 import type { MCPServer, Tool } from '../types/index.js';
+import { getMCPTools as getToolsFromDB } from './mcp-database.js';
 
 /**
  * Build tools array from user's enabled MCPs
@@ -52,13 +53,9 @@ export function parseToolCall(namespacedTool: string): {
 
 /**
  * Get tools for an MCP server
- * TODO: Replace with actual database query
  */
 async function getMCPTools(serverId: string): Promise<Tool[]> {
-  // Placeholder - in production, query from mcp_tools table
-  // SELECT * FROM mcp_tools WHERE server_id = serverId
-
-  return [];
+  return getToolsFromDB(serverId);
 }
 
 /**

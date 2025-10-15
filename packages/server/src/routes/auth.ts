@@ -5,6 +5,8 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import type { RegisterRequest, LoginRequest } from '../types/index.js';
+import * as authService from '../services/auth-service.js';
+import { requireAuth } from '../middleware/auth-middleware.js';
 
 export const authRouter = Router();
 
@@ -16,19 +18,24 @@ authRouter.post('/register', async (req: Request, res: Response) => {
   try {
     const { email, password, name } = req.body as RegisterRequest;
 
-    // TODO: Implement user registration
-    // - Hash password with bcrypt
-    // - Generate API key
-    // - Create user in database
-    // - Return JWT token
+    if (!email || !password) {
+      res.status(400).json({
+        success: false,
+        error: 'Email and password are required',
+      });
+      return;
+    }
+
+    const result = await authService.register(email, password, name);
 
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
-      user: { email, name },
+      user: result.user,
+      token: result.session?.access_token,
     });
   } catch (error: any) {
-    res.status(500).json({
+    res.status(400).json({
       success: false,
       error: error.message,
     });
@@ -43,19 +50,55 @@ authRouter.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body as LoginRequest;
 
-    // TODO: Implement user login
-    // - Find user by email
-    // - Verify password with bcrypt
-    // - Generate JWT token
-    // - Return token and user info
+    if (!email || !password) {
+      res.status(400).json({
+        success: false,
+        error: 'Email and password are required',
+      });
+      return;
+    }
+
+    const result = await authService.login(email, password);
 
     res.json({
       success: true,
-      token: 'jwt_token_here',
-      user: { email },
+      user: result.user,
+      token: result.token,
+      refreshToken: result.refreshToken,
     });
   } catch (error: any) {
-    res.status(500).json({
+    res.status(401).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * POST /api/auth/refresh
+ * Refresh access token
+ */
+authRouter.post('/refresh', async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      res.status(400).json({
+        success: false,
+        error: 'Refresh token required',
+      });
+      return;
+    }
+
+    const result = await authService.refreshToken(refreshToken);
+
+    res.json({
+      success: true,
+      token: result.token,
+      refreshToken: result.refreshToken,
+    });
+  } catch (error: any) {
+    res.status(401).json({
       success: false,
       error: error.message,
     });
@@ -64,19 +107,27 @@ authRouter.post('/login', async (req: Request, res: Response) => {
 
 /**
  * GET /api/auth/me
- * Get current user info
+ * Get current user info (requires authentication)
  */
-authRouter.get('/me', async (req: Request, res: Response) => {
+authRouter.get('/me', requireAuth, async (req: Request, res: Response) => {
+  res.json({
+    success: true,
+    user: req.user,
+  });
+});
+
+/**
+ * POST /api/auth/logout
+ * Logout user
+ */
+authRouter.post('/logout', requireAuth, async (req: Request, res: Response) => {
   try {
-    // TODO: Get user from JWT token in Authorization header
+    const token = req.headers.authorization?.replace('Bearer ', '') || '';
+    await authService.logout(token);
 
     res.json({
       success: true,
-      user: {
-        id: 'user_id',
-        email: 'user@example.com',
-        subscriptionTier: 'free',
-      },
+      message: 'Logged out successfully',
     });
   } catch (error: any) {
     res.status(500).json({
