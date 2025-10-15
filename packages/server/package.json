@@ -28,7 +28,10 @@
     "postgres": "^3.4.5",
     "pino": "^9.5.0",
     "pino-http": "^10.3.0",
-    "axios": "^1.7.9"
+    "axios": "^1.7.9",
+    "openai": "^4.77.3",
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@google/generative-ai": "^0.21.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

@@ -14,6 +14,7 @@ import { MCPRegistry } from './registry/mcp-registry.js';
 import { authRouter } from './routes/auth.js';
 import { mcpRouter } from './routes/mcp.js';
 import { marketplaceRouter } from './routes/marketplace.js';
+import { chatRouter } from './routes/chat.js';
 import { errorHandler } from './middleware/error-handler.js';
 
 // Load environment variables
@@ -52,6 +53,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRouter);
 app.use('/api/mcp', mcpRouter);
 app.use('/api/marketplace', marketplaceRouter);
+app.use('/api/chat', chatRouter);
 
 // MCP Protocol endpoint (for LLMs to connect)
 app.post('/mcp/call', async (req, res) => {

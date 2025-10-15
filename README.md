@@ -1,58 +1,69 @@
 # OmniMCP Platform
 
-**The App Store for AI - Connect any MCP server to any LLM with a single integration**
+**Chat with any LLM, supercharged with MCPs - The Cursor for AI Chat**
 
 ## The Vision
 
-LLMs are becoming the new "phones" - ubiquitous interfaces for interacting with software. OmniMCP is building the **App Store** that sits between LLMs and the tools they need.
+LLMs are becoming the new "phones" - ubiquitous interfaces for interacting with software. OmniMCP is building the **chat interface + app store** that lets you use any LLM with any MCP tool.
 
 ### The Problem
 
-Today, connecting tools to LLMs is fragmented:
-- **LLM Users**: Need to manually configure each MCP server for every tool
-- **Developers**: Build MCP servers but struggle with distribution and monetization
-- **Enterprises**: Want centralized management of AI tool access across their organization
+Today, using LLMs with tools is fragmented:
+- **Users**: Can't easily connect tools to ChatGPT, Claude, or other LLMs
+- **Developers**: Build MCP servers but have no distribution channel
+- **Power Users**: Need to configure complex MCP setups per LLM
 
 ### The Solution
 
-**OmniMCP Platform** is a middleware layer that:
+**OmniMCP Platform** provides:
 
-1. **For LLM Users**: Connect to OmniMCP once, get access to all your tools
-2. **For Developers**: Build once with our SDK, reach all LLM users
-3. **For Enterprises**: Central dashboard to manage, monitor, and control AI tool access
+1. **Web Chat Interface**: Chat with ChatGPT, Claude, Gemini, or any LLM - all in one place
+2. **MCP Marketplace**: Browse and enable tools like apps - GitHub, Slack, Weather, and more
+3. **Developer SDK**: Build MCPs once, reach thousands of users
+4. **No Configuration**: Works out of the box - no LLM setup required
 
-## Architecture
+Think: **"Cursor, but for chat with any LLM + MCP marketplace"**
+
+## How It Works
 
 ```
-┌─────────────────────────────────────┐
-│   LLM Clients (ChatGPT, Claude)    │
-└──────────────┬──────────────────────┘
-               │
-               │ Single MCP Connection
-               │
-┌──────────────▼──────────────────────┐
-│       OmniMCP Platform              │
-│  ┌──────────────────────────────┐   │
-│  │  API Gateway & Router        │   │
-│  └──────────────────────────────┘   │
-│  ┌──────────────────────────────┐   │
-│  │  User Management & Auth      │   │
-│  └──────────────────────────────┘   │
-│  ┌──────────────────────────────┐   │
-│  │  MCP Marketplace             │   │
-│  └──────────────────────────────┘   │
-│  ┌──────────────────────────────┐   │
-│  │  No-Code Dashboard           │   │
-│  └──────────────────────────────┘   │
-└──────────────┬──────────────────────┘
-               │
-      ┌────────┴─────────┐
-      │                  │
-┌─────▼─────┐    ┌──────▼──────┐
-│ Platform  │    │ User-Built  │
-│ Hosted    │    │ MCPs        │
-│ MCPs      │    │ (via SDK)   │
-└───────────┘    └─────────────┘
+┌──────────────────────────────────────────────┐
+│     User visits omnimcp.io                   │
+│                                              │
+│  ┌────────────────────────────────────┐     │
+│  │  Chat Interface                    │     │
+│  │  ┌──────────────────────────────┐  │     │
+│  │  │ Model: [ChatGPT-4 ▼]         │  │     │
+│  │  │                              │  │     │
+│  │  │ Your Apps:                   │  │     │
+│  │  │ ✓ GitHub                     │  │     │
+│  │  │ ✓ Weather                    │  │     │
+│  │  │ ✗ Slack                      │  │     │
+│  │  └──────────────────────────────┘  │     │
+│  │                                    │     │
+│  │  User: "Create a GitHub issue"     │     │
+│  │  AI:   "Issue created! #123"       │     │
+│  └────────────────────────────────────┘     │
+└──────────────────┬───────────────────────────┘
+                   │
+                   │ Chat API
+                   │
+┌──────────────────▼───────────────────────────┐
+│        OmniMCP Platform (Your Server)        │
+│                                              │
+│  1. Calls selected LLM (OpenAI/Anthropic)   │
+│  2. Passes enabled MCPs as function calls   │
+│  3. LLM calls GitHub MCP                    │
+│  4. Executes MCP tool                       │
+│  5. Returns result to LLM                   │
+│  6. LLM generates response                  │
+│                                              │
+│  ┌────────────────────────────────────┐     │
+│  │  MCP Marketplace                   │     │
+│  │  - SDK for developers              │     │
+│  │  - Browse/install MCPs             │     │
+│  └────────────────────────────────────┘     │
+└──────────────────────────────────────────────┘
 ```
 
 ## Core Features
