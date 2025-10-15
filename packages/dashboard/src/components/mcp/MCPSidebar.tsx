@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 import { X, Plus, CheckCircle, Circle } from 'lucide-react';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 interface MCP {
   id: string;
@@ -34,7 +39,7 @@ export function MCPSidebar({ onClose }: MCPSidebarProps) {
       id: '3',
       name: 'Slack',
       description: 'Send messages, read channels',
-      enabled: false,
+      enabled: true,
     },
   ]);
 
@@ -49,61 +54,68 @@ export function MCPSidebar({ onClose }: MCPSidebarProps) {
   const enabledCount = mcps.filter((m) => m.enabled).length;
 
   return (
-    <aside className="w-80 border-r bg-white flex flex-col h-full">
+    <aside className="w-80 border-r bg-background flex flex-col h-full">
       {/* Header */}
       <div className="px-6 py-4 border-b flex items-center justify-between">
         <div>
           <h2 className="font-semibold text-lg">Your Apps</h2>
-          <p className="text-sm text-gray-500">{enabledCount} enabled</p>
+          <div className="flex items-center gap-2 mt-1">
+            <Badge variant="secondary">{enabledCount} enabled</Badge>
+          </div>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onClose}
-          className="p-2 hover:bg-gray-100 rounded-lg"
         >
           <X className="w-5 h-5" />
-        </button>
+        </Button>
       </div>
 
       {/* MCP List */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        <div className="space-y-3">
+      <ScrollArea className="flex-1">
+        <div className="px-4 py-4 space-y-3">
           {mcps.map((mcp) => (
-            <div
+            <Card
               key={mcp.id}
-              className={`p-4 border rounded-lg cursor-pointer transition-all ${
+              className={`cursor-pointer transition-all ${
                 mcp.enabled
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-primary bg-primary/5'
+                  : 'hover:border-muted-foreground/20'
               }`}
               onClick={() => toggleMCP(mcp.id)}
             >
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5">
-                  {mcp.enabled ? (
-                    <CheckCircle className="w-5 h-5 text-blue-600" />
-                  ) : (
-                    <Circle className="w-5 h-5 text-gray-400" />
-                  )}
+              <CardHeader className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5">
+                    {mcp.enabled ? (
+                      <CheckCircle className="w-5 h-5 text-primary" />
+                    ) : (
+                      <Circle className="w-5 h-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <CardTitle className="text-sm">{mcp.name}</CardTitle>
+                    <CardDescription className="text-xs mt-1">
+                      {mcp.description}
+                    </CardDescription>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-sm">{mcp.name}</h3>
-                  <p className="text-xs text-gray-600 mt-1">
-                    {mcp.description}
-                  </p>
-                </div>
-              </div>
-            </div>
+              </CardHeader>
+            </Card>
           ))}
         </div>
-      </div>
+      </ScrollArea>
+
+      <Separator />
 
       {/* Browse Marketplace */}
-      <div className="px-4 py-4 border-t">
-        <button className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2">
-          <Plus className="w-4 h-4" />
+      <div className="px-4 py-4">
+        <Button className="w-full" size="lg">
+          <Plus className="w-4 h-4 mr-2" />
           Browse Marketplace
-        </button>
-        <p className="text-xs text-gray-500 mt-2 text-center">
+        </Button>
+        <p className="text-xs text-muted-foreground mt-2 text-center">
           Discover and install more apps
         </p>
       </div>

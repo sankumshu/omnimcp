@@ -45,22 +45,39 @@ export interface StreamChunk {
  * Main LLM Provider class
  */
 export class LLMProvider {
-  private openai: OpenAI;
-  private anthropic: Anthropic;
-  private google: GoogleGenerativeAI;
+  private openai: OpenAI | null = null;
+  private anthropic: Anthropic | null = null;
+  private google: GoogleGenerativeAI | null = null;
 
   constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    // Lazy initialization - clients created on first use
+  }
 
-    this.anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    });
+  private getOpenAI(): OpenAI {
+    if (!this.openai) {
+      this.openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+    }
+    return this.openai;
+  }
 
-    this.google = new GoogleGenerativeAI(
-      process.env.GOOGLE_API_KEY || ''
-    );
+  private getAnthropic(): Anthropic {
+    if (!this.anthropic) {
+      this.anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+    }
+    return this.anthropic;
+  }
+
+  private getGoogle(): GoogleGenerativeAI {
+    if (!this.google) {
+      this.google = new GoogleGenerativeAI(
+        process.env.GOOGLE_API_KEY || ''
+      );
+    }
+    return this.google;
   }
 
   /**
@@ -107,7 +124,7 @@ export class LLMProvider {
     messages: Message[],
     tools: Tool[]
   ): Promise<LLMResponse> {
-    const response = await this.openai.chat.completions.create({
+    const response = await this.getOpenAI().chat.completions.create({
       model,
       messages,
       tools: this.convertToolsToOpenAI(tools),
@@ -141,7 +158,7 @@ export class LLMProvider {
     messages: Message[],
     tools: Tool[]
   ): AsyncGenerator<StreamChunk> {
-    const stream = await this.openai.chat.completions.create({
+    const stream = await this.getOpenAI().chat.completions.create({
       model,
       messages,
       tools: this.convertToolsToOpenAI(tools),
@@ -203,7 +220,7 @@ export class LLMProvider {
     messages: Message[],
     tools: Tool[]
   ): Promise<LLMResponse> {
-    const response = await this.anthropic.messages.create({
+    const response = await this.getAnthropic().messages.create({
       model,
       max_tokens: 4096,
       messages: messages.map((m) => ({
@@ -242,7 +259,7 @@ export class LLMProvider {
     messages: Message[],
     tools: Tool[]
   ): AsyncGenerator<StreamChunk> {
-    const stream = await this.anthropic.messages.stream({
+    const stream = this.getAnthropic().messages.stream({
       model,
       max_tokens: 4096,
       messages: messages.map((m) => ({
@@ -286,7 +303,7 @@ export class LLMProvider {
     messages: Message[],
     tools: Tool[]
   ): Promise<LLMResponse> {
-    const genModel = this.google.getGenerativeModel({ model });
+    const genModel = this.getGoogle().getGenerativeModel({ model });
 
     const prompt = messages.map((m) => m.content).join('\n');
     const result = await genModel.generateContent(prompt);

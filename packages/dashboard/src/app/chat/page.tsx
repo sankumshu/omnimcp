@@ -8,7 +8,7 @@ export default function ChatPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background">
       {/* MCP Sidebar */}
       {sidebarOpen && (
         <MCPSidebar onClose={() => setSidebarOpen(false)} />

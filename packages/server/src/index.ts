@@ -23,12 +23,6 @@ config();
 // Initialize logger
 const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-    },
-  },
 });
 
 // Initialize Express app
@@ -43,6 +37,39 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(pinoHttp({ logger }));
+
+// Root endpoint - API information
+app.get('/', (req, res) => {
+  res.json({
+    name: 'OmniMCP Platform API',
+    version: '0.1.0',
+    description: 'Connect any MCP server to any LLM with a single integration',
+    endpoints: {
+      health: 'GET /health',
+      chat: {
+        models: 'GET /api/chat/models',
+        chat: 'POST /api/chat',
+        simpleChat: 'POST /api/chat/simple',
+      },
+      auth: {
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login',
+        me: 'GET /api/auth/me',
+      },
+      mcp: {
+        list: 'GET /api/mcp',
+        register: 'POST /api/mcp/register',
+        call: 'POST /mcp/call',
+      },
+      marketplace: {
+        browse: 'GET /api/marketplace',
+        featured: 'GET /api/marketplace/featured',
+        search: 'GET /api/marketplace/search',
+      },
+    },
+    documentation: 'https://github.com/yourusername/omnimcp',
+  });
+});
 
 // Health check
 app.get('/health', (req, res) => {

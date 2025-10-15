@@ -2,6 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 
 interface Message {
   id: string;
@@ -138,40 +144,42 @@ export function ChatInterface({ onToggleSidebar, sidebarOpen }: ChatInterfacePro
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <header className="border-b bg-white px-6 py-4 flex items-center justify-between">
+      <header className="border-b bg-background px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           {!sidebarOpen && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onToggleSidebar}
-              className="p-2 hover:bg-gray-100 rounded-lg"
             >
               <Settings className="w-5 h-5" />
-            </button>
+            </Button>
           )}
 
-          <select
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="gpt-4">ChatGPT-4</option>
-            <option value="gpt-4-turbo">ChatGPT-4 Turbo</option>
-            <option value="gpt-3.5-turbo">ChatGPT-3.5</option>
-            <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
-            <option value="claude-3-opus-20240229">Claude 3 Opus</option>
-            <option value="gemini-pro">Gemini Pro</option>
-          </select>
+          <Select value={model} onValueChange={setModel}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Select a model" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="gpt-4">ChatGPT-4</SelectItem>
+              <SelectItem value="gpt-4-turbo">ChatGPT-4 Turbo</SelectItem>
+              <SelectItem value="gpt-3.5-turbo">ChatGPT-3.5</SelectItem>
+              <SelectItem value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</SelectItem>
+              <SelectItem value="claude-3-opus-20240229">Claude 3 Opus</SelectItem>
+              <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="text-sm text-gray-500">
+        <Badge variant="secondary">
           {messages.filter((m) => m.role === 'user').length} messages
-        </div>
+        </Badge>
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-8">
+      <ScrollArea className="flex-1 px-6 py-8">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+          <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
             <h2 className="text-2xl font-semibold mb-2">
               Chat with any LLM
             </h2>
@@ -188,50 +196,52 @@ export function ChatInterface({ onToggleSidebar, sidebarOpen }: ChatInterfacePro
                   message.role === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                <Card
+                  className={`max-w-[80%] ${
                     message.role === 'user'
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-primary text-primary-foreground'
                       : message.role === 'system'
-                      ? 'bg-red-100 text-red-900'
-                      : 'bg-white border shadow-sm'
+                      ? 'bg-destructive/10 border-destructive/50'
+                      : 'bg-card'
                   }`}
                 >
-                  <div className="text-sm font-medium mb-1">
-                    {message.role === 'user' ? 'You' : 'AI'}
+                  <div className="px-4 py-3">
+                    <div className="text-sm font-medium mb-1">
+                      {message.role === 'user' ? 'You' : 'AI'}
+                    </div>
+                    <div className="whitespace-pre-wrap text-sm">{message.content}</div>
                   </div>
-                  <div className="whitespace-pre-wrap">{message.content}</div>
-                </div>
+                </Card>
               </div>
             ))}
             <div ref={messagesEndRef} />
           </div>
         )}
-      </div>
+      </ScrollArea>
 
       {/* Input */}
-      <footer className="border-t bg-white px-6 py-4">
+      <footer className="border-t bg-background px-6 py-4">
         <div className="max-w-3xl mx-auto">
           <div className="flex gap-3">
-            <input
+            <Input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
               placeholder="Ask anything..."
               disabled={isLoading}
-              className="flex-1 px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="flex-1"
             />
-            <button
+            <Button
               onClick={sendMessage}
               disabled={!input.trim() || isLoading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              size="lg"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 mr-2" />
               {isLoading ? 'Sending...' : 'Send'}
-            </button>
+            </Button>
           </div>
-          <div className="mt-2 text-xs text-gray-500 text-center">
+          <div className="mt-2 text-xs text-muted-foreground text-center">
             Press Enter to send, Shift+Enter for new line
           </div>
         </div>

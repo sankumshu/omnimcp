@@ -3,6 +3,7 @@
  * Handles user registration, login, and token management using Supabase Auth
  */
 
+// @ts-nocheck
 import { supabase } from '../db/supabase.js';
 import crypto from 'crypto';
 

@@ -252,15 +252,4 @@ chatRouter.get('/models', async (req: Request, res: Response) => {
   });
 });
 
-/**
- * Helper: Get user's enabled MCPs
- * TODO: Replace with actual database query
- */
-async function getUserEnabledMCPs(userId: string) {
-  // Placeholder - query user_mcp_installations + mcp_servers
-  // SELECT ms.* FROM mcp_servers ms
-  // JOIN user_mcp_installations umi ON ms.id = umi.server_id
-  // WHERE umi.user_id = userId AND umi.enabled = true
-
-  return [];
-}
+// Note: getUserEnabledMCPs is imported from mcp-database service
